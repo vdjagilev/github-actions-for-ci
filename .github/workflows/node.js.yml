@@ -11,12 +11,23 @@ on:
 
 jobs:
   build:
-
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: npm install and build webpack
+        run: |
+          npm install
+          npm run build
+  test:
     runs-on: ubuntu-latest
 
-    strategy:
+      - uses: actions/upload-artifact@master
+    needs: build
+          name: webpack artifacts
+          path: public/
       matrix:
-        node-version: [10.x, 12.x, 14.x, 15.x]
+        os: [ubuntu-latest, windows-2016]
+        node-version: [12.x, 14.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
@@ -25,6 +36,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm test
+    - name: npm install, and test
+      run: |
+        npm install
+        npm test
+      env:
+        CI: true
+  
+    
